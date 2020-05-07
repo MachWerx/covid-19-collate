@@ -91,7 +91,7 @@ def main():
   file_cases.write(','.join(header) + '\n')
   file_deaths.write(','.join(header) + '\n')
   for date in sorted(cases):
-    line_cases = [date] #+ [str(cases_sum[date][state]) for state in states]
+    line_cases = [date]
     line_deaths = [date]
     for state in state_list:
       if state in cases_sum[date]:
@@ -101,7 +101,7 @@ def main():
         line_cases.append('0')
         line_deaths.append('0')
     file_cases.write(','.join(line_cases) + '\n')
-    file_deaths.write(','.join(line_cases) + '\n')
+    file_deaths.write(','.join(line_deaths) + '\n')
   file_cases.close()
   file_deaths.close()
 
