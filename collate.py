@@ -14,9 +14,14 @@ def main():
     # ignore header
     file.readline().split(',')
     
-    cases = {}
-    deaths = {}
-    states = {}
+    cases = {}       # cases[date][state][county] = number of cases for that point
+    deaths = {}      # cases[date][state][county] = number of deaths for that point
+
+    cases_sum = {}   # cases_sum[date][state] = total number of cases for that state
+    deaths_sum = {}  # deaths_sum[date][state] = total number of deaths for that state
+
+    states = {}      # states[state]['counties'] = list of counties for that state
+                     # states[state]['fips'] = corresponding list of fips for that state
     for line in file:
       # columns are: date, county, state, fips, cases, deaths
       [date, county, state, f, c, d] = line.split(',')
@@ -33,12 +38,18 @@ def main():
       if date not in cases:
         cases[date] = {}
         deaths[date] = {}
+        cases_sum[date] = {}
+        deaths_sum[date] = {}
       if state not in cases[date]:
         cases[date][state] = {}
         deaths[date][state] = {}
+        cases_sum[date][state] = 0
+        deaths_sum[date][state] = 0
       cases[date][state][county] = c
       deaths[date][state][county] = d
-  
+      cases_sum[date][state] += int(c)
+      deaths_sum[date][state] += int(d)
+
   # write out per-state data
   for state in states:
     # create file for number of cases
@@ -54,10 +65,8 @@ def main():
     for date in sorted(cases):
       if state in cases[date]:
         # initialize data for current date
-        line_cases = []
-        line_cases.append(date)
-        line_deaths = []
-        line_deaths.append(date)
+        line_cases = [date]
+        line_deaths = [date]
         
         # collect the data
         for county in states[state]['counties']:
@@ -73,6 +82,28 @@ def main():
         file_deaths.write(','.join(line_deaths) + '\n')
     file_cases.close()
     file_deaths.close()
+
+  # write out state aggregate cases data
+  file_cases = open('states_cases.csv', 'w')
+  file_deaths = open('states_deaths.csv', 'w')
+  state_list = list(states)  # make sure we use the same order of states everywhere
+  header = ['date'] + state_list
+  file_cases.write(','.join(header) + '\n')
+  file_deaths.write(','.join(header) + '\n')
+  for date in sorted(cases):
+    line_cases = [date] #+ [str(cases_sum[date][state]) for state in states]
+    line_deaths = [date]
+    for state in state_list:
+      if state in cases_sum[date]:
+        line_cases.append(str(cases_sum[date][state]))
+        line_deaths.append(str(deaths_sum[date][state]))
+      else:
+        line_cases.append('0')
+        line_deaths.append('0')
+    file_cases.write(','.join(line_cases) + '\n')
+    file_deaths.write(','.join(line_cases) + '\n')
+  file_cases.close()
+  file_deaths.close()
 
 if __name__== "__main__":
   main()
