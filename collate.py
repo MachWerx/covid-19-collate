@@ -48,7 +48,8 @@ def main():
       cases[date][state][county] = c
       deaths[date][state][county] = d
       cases_sum[date][state] += int(c)
-      deaths_sum[date][state] += int(d)
+      if d != '':
+        deaths_sum[date][state] += int(d)
 
   # write out per-state data
   for state in states:
